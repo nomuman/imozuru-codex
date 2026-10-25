@@ -1,0 +1,4 @@
+interface:
+  display_name: "imozuru"
+  short_description: "Trace field terminology, people, and original sources"
+  default_prompt: "Use $imozuru to research this field and collect original sources with a verified research record."

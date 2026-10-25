@@ -570,11 +570,7 @@ def imozuru_version() -> str:
     return m.group(1) if m else "不明"
 
 
-# 感想・要望を送る先。作者の Google フォームの「事前入力したリンク」を、仮の値（種類=不具合・評価=5・内容=BODY・版=VERSION・環境=ENV）を
-# 入れて取ったもの。項目の番号（entry.N）はこのリンクから読む。空ならボタンを出さない（2026-10-25 かしぇ「フォームに送る」）。
-# 環境変数 IMOZURU_FEEDBACK_FORM で差し替えられ、off で消せる（フォークした人が自分のフォームへ向けるため）
-FEEDBACK_FORM = ("https://docs.google.com/forms/d/e/1FAIpQLScmjsJ363aHtpUVy6-cDxQ_OnwAcQE0hp7CjigMFG57c-OjJA/viewform?usp=pp_url"
-                 "&entry.1218111923=%E4%B8%8D%E5%85%B7%E5%90%88&entry.860970375=5&entry.1447275214=BODY&entry.1226542421=VERSION&entry.1935341889=ENV")
+FEEDBACK_FORM = ""
 FEEDBACK_KINDS = ("不具合", "要望", "感想")
 
 

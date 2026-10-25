@@ -1,4 +1,4 @@
-# imozuru
+# imozuru for Codex
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/brand/logo/imozuru-lockup-light.svg">
@@ -7,7 +7,9 @@
 
 [日本語](README.md) | English
 
-imozuru is a Claude Code skill that digs into an unfamiliar field, pulling one lead after another until it reaches the original sources.
+This repository adapts [MaryCache/imozuru](https://github.com/MaryCache/imozuru) for Codex.
+imozuru digs into an unfamiliar field, following leads until it reaches the original sources.
+The fork retains the research workflow and Python scripts, and adapts installation, invocation, and tool guidance for Codex.
 It applies ideas from information-seeking research in library and information science, such as Bates's berrypicking, Ellis's model of information-seeking behaviour, and Kuhlthau's Information Search Process.
 
 An AI judges better in a field once it has collected that field's explicit knowledge and know-how.
@@ -18,7 +20,7 @@ Changes by version are listed in [CHANGELOG.md](CHANGELOG.md) (in Japanese).
 
 The name comes from *imozuru-shiki* (芋づる式), the Japanese idiom for things coming up one after another, like sweet potatoes pulled up on a single vine.
 
-> **Language note**: The skill's instructions (`SKILL.md`), the messages from its scripts, and the labels on the extract page are in Japanese. Claude reads the instructions in any language, but this skill has only been tried with requests written in Japanese.
+> **Language note**: The skill's instructions (`SKILL.md`), the messages from its scripts, and the labels on the extract page are in Japanese. Upstream trials used Japanese requests. This fork has not yet verified an end-to-end Codex research session.
 
 ## How it differs from existing AI research methods
 
@@ -34,8 +36,9 @@ The AI uses the gathered sources as material for its judgement, and the user can
 
 <img src="assets/figures/flow-en.webp" alt="The imozuru flow. 1 Write the question and its points. 2 Map the field: terms, people, venues. 3 Follow citations, links and authors. 4 Save the sources. Check whether every point has a source; if not yet, go round again from 3. Once it does, or the search is saturated, 5 build the extract page and the detailed report, and 6 look back on the dashboard" width="720">
 
-Claude first writes down the question and the 3 to 6 points needed to answer it.
-Next, two searchers (subagents that search the web) with different approaches collect terms, people, and venues into a map (`map.md`).
+Codex first writes down the question and the 3 to 6 points needed to answer it.
+Next, two searches with different approaches collect terms, people, and venues into a map (`map.md`).
+When subagents are available and permitted, Codex delegates to two searchers. Otherwise, Codex runs the searches sequentially.
 After that, it follows references, citing works, and authors until it finds the sources.
 In fields without papers, it follows links inside articles and notes such as "I based this on so-and-so's post".
 
@@ -43,35 +46,40 @@ Sources it finds are saved to `sources/`, and 404 pages and login walls are drop
 When every point has a source, or no new sources turn up, the search stops.
 Finally, it builds a page that lists passages cut from the sources, point by point (the extract page), and an explanation of the field (the detailed report).
 
-Watch mode (`/imozuru watch <topic>`) runs separately from the investigation flow above.
+Watch mode (`$imozuru watch <topic>`) runs separately from the investigation flow above.
 It collects new posts from the venues a dig turned up (Qiita and Zenn tags, note, YouTube, blogs, arXiv) via RSS and lists them.
 
 ## Install
 
-### As a Claude Code plugin
-
-Add this repository as a marketplace and install the plugin.
-
-```text
-/plugin marketplace add MaryCache/imozuru
-/plugin install imozuru@imozuru
-```
-
-The plugin carries no version number, so every commit to main counts as a new version.
-To stay up to date automatically, turn on auto-update for imozuru in the marketplace screen of `/plugin`.
-To update by hand, run `claude plugin marketplace update imozuru`.
-
-### With the skills CLI
-
-You can also install it with the [skills](https://github.com/vercel-labs/skills) CLI.
+Copy the complete skill folder using the [Codex skills guide](https://learn.chatgpt.com/docs/build-skills).
+These commands stop the copy if a skill with the same name already exists.
 
 ```sh
-npx skills add MaryCache/imozuru
+git clone https://github.com/nomuman/imozuru-codex.git
+cd imozuru-codex
+if [ -e "$HOME/.agents/skills/imozuru" ] || [ -L "$HOME/.agents/skills/imozuru" ]; then
+  printf '%s\n' 'imozuru already exists; inspect it before installing.'
+else
+  mkdir -p "$HOME/.agents/skills"
+  cp -R skills/imozuru "$HOME/.agents/skills/imozuru"
+fi
 ```
 
-To install by hand, copy `skills/imozuru/` to `~/.claude/skills/imozuru/`.
+For one project, copy the folder to that project's `.agents/skills/imozuru/` instead.
+Check that the destination does not exist and include everything in `skills/imozuru/`.
+Restart the Codex session if the skill does not appear.
+
+Copied skills do not update automatically. To update, run `git pull --ff-only` in this repository and review the changes.
+Preserve any local edits, move the installed folder to a backup location, and copy the new folder.
+
+Standalone script commands below run from the repository root.
+For an installed skill, use an absolute path such as `python3 ~/.agents/skills/imozuru/scripts/<name>.py ...`.
+The `examples/demo/` sample belongs to the repository and is not included when copying only the skill.
 
 ## Requirements
+
+Research needs web search exposed by the Codex host, a shell that can run Python, and network access to external sites.
+Subagents are optional. A complete investigation and watch workflow in Codex has not yet been verified for this fork.
 
 The scripts run on the Python 3.10+ standard library alone, and use the following commands when they are installed.
 
@@ -87,7 +95,7 @@ The scripts run on the Python 3.10+ standard library alone, and use the followin
 
 ## Usage
 
-Ask Claude Code something like this.
+Invoke `$imozuru <question>` in Codex, or ask something like this.
 
 ```
 芋づる式に調べて: 歌ってみたの MIX で、上手い人がどういう順番で処理しているか
@@ -100,7 +108,7 @@ Gaussian Splatting ってよく聞くけど全然わからない。論文とか�
 ```
 
 ```
-/imozuru watch react
+$imozuru watch react
 ```
 
 Results are saved to `~/research/<topic>/` in this form.
@@ -136,7 +144,7 @@ Why the passages are checked by machine is explained under "Why extracts are che
 
 A page that explains the field in three versions for readers with different background knowledge.
 Every sentence carries a quotation from a source as its evidence, and the full record of what was searched and what turned up comes with it.
-Claude writes the explanation once the search has stopped, and `digest.py` checks every quotation against the sources before building the page.
+Codex writes the explanation once the search has stopped, and `digest.py` checks every quotation against the sources before building the page.
 Why it has two layers, explanation and record, is explained under "The two layers of the detailed report" below.
 
 ### Research dashboard
@@ -156,7 +164,10 @@ The home view summarises why each investigation stopped, where the sources came 
 Choosing a topic in the sidebar opens its details: research points, rounds, sources, and documents; the detailed report and the extract page open inside the same view.
 The sidebar search covers titles, questions, terms, people, and venues, and also matches hiragana and romaji.
 The "?" button at the top right opens the help, which explains each part of the screen.
-While a document is open, the button at the bottom left saves it as a PDF, and the speech-bubble button at the top right sends feedback to the author.
+While a document is open, the button at the bottom left saves it as a PDF.
+Report fork bugs and requests in [Issues](https://github.com/nomuman/imozuru-codex/issues).
+The feedback form button is hidden by default. Set `IMOZURU_FEEDBACK_FORM` to a prefilled link for your own Google Form to enable it.
+Include fields for kind (`不具合`, `要望`, or `感想`) and body (`BODY`). Optional fields are rating (`5`), version (`VERSION`), and environment (`ENV`). Set `off` to disable it.
 The dashboard's labels are in Japanese.
 
 ### On a phone
@@ -215,7 +226,7 @@ imozuru follows those the same way it follows papers, so each saved source gets 
 
 Dozens of saved sources leave the user with no idea where to start.
 So, following extracting from Ellis's model, the skill builds a page that cuts the relevant passage from a source for each point.
-So that no paraphrase slips in when Claude cuts out the passages, `report.py` checks that each extract appears verbatim at the given lines of its source, and if even one word differs, it does not build the page.
+So that no paraphrase slips in when Codex cuts out the passages, `report.py` checks that each extract appears verbatim at the given lines of its source, and if even one word differs, it does not build the page.
 
 ### The two layers of the detailed report
 
@@ -240,9 +251,9 @@ The record is assembled by machine from every hit of every query and from the fe
 
 - The searchers search the web, so the content of your question leaves your machine as search terms. Don't use the skill for research involving confidential or personal data.
 - The skill does not use ways around paywalls, and sources it cannot reach are reported as "not reached".
-- Saved sources are copies for reading locally, so please don't redistribute them.
+- Source storage and quotations follow the host's copyright and tool constraints. Search snippets do not count as a full source. Saved sources are copies for reading locally. Do not redistribute them.
 - The fetching scripts only fetch http(s) URLs, and never fetch local or internal addresses (127.0.0.1, 192.168.x.x and so on), so that a crafted URL in search results cannot read services running on your machine. Some VPN and proxy tools resolve even public site names to internal addresses, and then nothing can be fetched. Only in that case, set the environment variable `IMOZURU_ALLOW_PRIVATE=1` to turn this address check off. When using a proxy, the proxy resolves the hostname, so pinning the connection to a checked IP cannot prevent DNS rebinding.
 
 ## License
 
-MIT
+MIT. The original MaryCache copyright and permission notice is retained in [LICENSE](LICENSE) and included in the standalone skill folder.

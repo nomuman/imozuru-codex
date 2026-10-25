@@ -103,6 +103,15 @@ class AppFeatureTests(unittest.TestCase):
 
     # --- 感想・要望を送る ---
 
+    def test_feedback_is_absent_without_an_environment_setting(self):
+        with patch.dict(os.environ):
+            os.environ.pop("IMOZURU_FEEDBACK_FORM", None)
+            page = dash.render(dash.collect(self.root, []), self.root)
+        self.assertNotIn('id="fb"', page)
+        self.assertNotIn('id="fb-dlg"', page)
+        self.assertNotIn('action="https://docs.google.com', page)
+        self.assertIn("form-action 'none'", page)
+
     def test_feedback_form_link_is_parsed_into_fields(self):
         with patch.dict(os.environ, {"IMOZURU_FEEDBACK_FORM": FORM}):
             f = dash.feedback_form()

@@ -3,11 +3,18 @@
 imozuruのバージョンごとの変更を記録します。
 書式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に、バージョン番号は [セマンティック バージョニング](https://semver.org/lang/ja/) に沿っています。
 
-プラグインの `plugin.json` にはバージョン番号を書いていません。
-mainにコミットが入るたびに、使っている人へ更新が届きます。
-バージョン番号はまとまった変更の区切りを示すために、この変更履歴とgitのタグ（`v2.0.0` など）だけに付けます。
+このフォークは Codex 向けのスキルとして配布し、コピーしたインストールは手動で更新します。
+2.0.0 以前の項目は [MaryCache/imozuru](https://github.com/MaryCache/imozuru) の変更履歴です。
+上流では Claude Code プラグインの `plugin.json` にバージョン番号を付けず、main の更新を配布していました。
+以下のバージョン番号とタグは、その上流のリリースを表します。
 
 ## [未公開]
+
+- Codex 向けの導入手順と `$imozuru` の呼び出しを日本語・英語の README に追加しました。
+- スキルの道具の指定を Codex 環境に合わせ、検索役が使えない場合の逐次検索と、インストール先を基準にしたスクリプト実行を明記しました。
+- Codex のスキル表示用 `agents/openai.yaml` を追加し、Claude Code のプラグイン定義を削除しました。
+- スキル単体のコピーにも MIT の著作権・許諾表示を含めました。
+- フィードバックフォームを既定では無効にしました。`IMOZURU_FEEDBACK_FORM` を設定した場合だけ表示します。
 
 ## [2.0.0] - 2026-10-25
 
@@ -111,6 +118,6 @@ AIの判断能力は形式知・ノウハウを収集することで強化され
 - 検索結果から来るURL・本文・フィードを、他人が細工したものとして扱う。
 - 文字の層が無いPDFのOCRで、言語データから言語を選び、意味をなさない読み取りを失敗として扱う（#11）。
 
-[未公開]: https://github.com/MaryCache/imozuru/compare/v2.0.0...HEAD
+[未公開]: https://github.com/nomuman/imozuru-codex/compare/a678b0743bb6cc37ef0f3a1a3a2dd6d19fc3c88d...HEAD
 [2.0.0]: https://github.com/MaryCache/imozuru/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/MaryCache/imozuru/releases/tag/v1.0.0
