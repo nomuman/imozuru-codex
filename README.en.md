@@ -76,6 +76,12 @@ Standalone script commands below run from the repository root.
 For an installed skill, use an absolute path such as `python3 ~/.agents/skills/imozuru/scripts/<name>.py ...`.
 The `examples/demo/` sample belongs to the repository and is not included when copying only the skill.
 
+## Autosave research records
+
+On first use, the skill asks whether to use hooks to save research records automatically to an existing local Git repository of your choice. It remembers a declined answer too. A yes configures the destination and merges hooks while preserving existing entries. Saving defaults to file copies. Commit and push each require an explicit choice.
+
+Optional Codex hooks prompt for setup after supported skill reads and save topics registered for the current session at Stop. You must approve trust in `/hooks`. Without hooks, the skill still asks on first use and saves after each round. See the [autosave setup guide](skills/imozuru/references/autosave.md) in Japanese for installation and scope. Original source files and generated HTML are excluded.
+
 ## Requirements
 
 Research needs web search exposed by the Codex host, a shell that can run Python, and network access to external sites.
